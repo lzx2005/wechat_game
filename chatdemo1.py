@@ -21,6 +21,7 @@ def text_reply(msg):
         data = daodemo.find_log_by_msg_id(msgid)
         for d in data:
             print("{}撤回了'{}'这条信息".format(d[0], d[1]))
+            itchat.send('%s撤回了"%s"这条信息' % (d[0], d[1]), msg['FromUserName'])
 
 
 @itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING])

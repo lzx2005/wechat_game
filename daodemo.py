@@ -44,7 +44,7 @@ def find_log_by_msg_id(msg_id):
     global conn
     try:
         cur = conn.cursor()
-        cur.execute(f'SELECT actual_nick_name,content from chat_log where msg_id = "{msg_id}"')
+        cur.execute(f'SELECT nickname,content from chat_log where msg_id = "{msg_id}"')
         data = cur.fetchall()
         cur.close()
         return data
