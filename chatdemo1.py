@@ -2,6 +2,8 @@ import itchat
 import re, sys, json
 from itchat.content import *
 
+group_user_name = ""
+
 
 @itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
 def text_reply(msg):
@@ -11,16 +13,16 @@ def text_reply(msg):
 
 @itchat.msg_register(TEXT, isGroupChat=True)
 def text_reply(msg):
-    json_object = json.dumps(msg)
-    print(json_object)
-    print("\n")
-    print(u'@%s\u2005I received: %s,%s' % (msg['ActualNickName'], msg['Content'], msg['FromUserName']))
+    print(u'%s,%s' % (msg['FromUserName'], group_user_name))
+    from_user_name = msg['FromUserName']
+    if from_user_name == group_user_name:
+        print(u'@%s\u2005 发了一句话: %s,%s' % (msg['ActualNickName'], msg['Content'], msg['FromUserName']))
 
 
 @itchat.msg_register(SYSTEM)
 def get_uin(msg):
     chatroom = itchat.search_chatrooms(name='只要我绝对，尬聊没有极限')
-    print(json.dumps(chatroom))
+    group_user_name = chatroom[0]['UserName']
 
 itchat.auto_login(enableCmdQR=2)
 itchat.run()
