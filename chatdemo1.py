@@ -11,8 +11,9 @@ group_user_name = ""
 
 @itchat.msg_register([NOTE], isGroupChat=True)
 def text_reply(msg):
-    print(msg)
-    if msg['MsgType'] == 10002:
+    global group_user_name
+    # print(msg)
+    if msg['MsgType'] == 10002 and msg['FromUserName'] == group_user_name:
         # 这个表示撤回一条信息，我们拦截这个，再去数据库里找被拦截的那条语句
         Content = msg['Content']
         soup = BeautifulSoup(Content, 'html.parser')
