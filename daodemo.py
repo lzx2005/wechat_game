@@ -38,3 +38,15 @@ def save_chat_log(msg_id, content, nickname, actual_nick_name, group_name, time)
         cur.close()
     except Exception as e:
         print(e)
+
+
+def find_log_by_msg_id(msg_id):
+    global conn
+    try:
+        cur = conn.cursor()
+        cur.execute(f'SELECT actual_nick_name,content from chat_log where msg_id = "{msg_id}"')
+        data = cur.fetchall()
+        cur.close()
+        return data
+    except Exception as e:
+        print(e)
