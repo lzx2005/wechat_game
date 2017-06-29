@@ -1,7 +1,7 @@
 import itchat
-import re, sys, json
+import re, sys, json,time
 from itchat.content import *
-
+import daodemo
 
 global group_user_name
 group_user_name = ""
@@ -17,15 +17,24 @@ def text_reply(msg):
 def text_reply(msg):
     global group_user_name
     from_user_name = msg['User']['UserName']
-    print(u'%s,%s' % (msg['User']['UserName'], group_user_name))
+    #print(u'%s,%s' % (msg['User']['UserName'], group_user_name))
     if from_user_name == group_user_name:
-        print(u'@%s\u2005 发了一句话: %s' % (msg['ActualNickName'], msg['Content']))
+        #找到真实的用户
+        nick_name = ''
+        member_list = msg['User']['MemberList']
+        for member in member_list:
+            if member['UserName'] == msg['ActualUserName']:
+                nick_name = member['NickName']
+        now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        daodemo.save_chat_log(msg['Content'], msg['ActualNickName'], nick_name, msg['User']['NickName'], now)
+        print(u'@%s\u2005 : %s' % (nick_name, msg['Content']))
 
 
 @itchat.msg_register(SYSTEM)
 def get_uin(msg):
     global group_user_name
     chatroom = itchat.search_chatrooms(name='只要我绝对，尬聊没有极限')
+    qun = chatroom[0]
     group_user_name = chatroom[0]['UserName']
 
 
