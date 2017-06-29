@@ -2,6 +2,8 @@ import itchat
 import re, sys, json
 from itchat.content import *
 
+
+global group_user_name
 group_user_name = ""
 
 
@@ -13,16 +15,19 @@ def text_reply(msg):
 
 @itchat.msg_register(TEXT, isGroupChat=True)
 def text_reply(msg):
-    print(u'%s,%s' % (msg['FromUserName'], group_user_name))
-    from_user_name = msg['FromUserName']
+    global group_user_name
+    from_user_name = msg['User']['UserName']
+    print(u'%s,%s' % (msg['User']['UserName'], group_user_name))
     if from_user_name == group_user_name:
-        print(u'@%s\u2005 发了一句话: %s,%s' % (msg['ActualNickName'], msg['Content'], msg['FromUserName']))
+        print(u'@%s\u2005 发了一句话: %s' % (msg['ActualNickName'], msg['Content']))
 
 
 @itchat.msg_register(SYSTEM)
 def get_uin(msg):
+    global group_user_name
     chatroom = itchat.search_chatrooms(name='只要我绝对，尬聊没有极限')
     group_user_name = chatroom[0]['UserName']
+
 
 itchat.auto_login(enableCmdQR=2)
 itchat.run()
