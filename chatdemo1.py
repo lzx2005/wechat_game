@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import itchat
-import re, sys, json, time
+import re, sys, json, time, random
 from itchat.content import *
 import daodemo
 from bs4 import BeautifulSoup
@@ -21,8 +24,8 @@ def text_reply(msg):
         # print("撤回了{}这条信息".format(msgid))
         data = daodemo.find_log_by_msg_id(msgid)
         for d in data:
-            print("{}撤回了'{}'这条信息".format(d[0], d[1]))
-            itchat.send('%s撤回了"%s"这条信息' % (d[0], d[1]), msg['FromUserName'])
+            print(u"{}撤回了'{}'这条信息".format(d[0].decode(encoding='utf-8'), d[1].decode(encoding='utf-8')))
+            itchat.send('%s撤回了"%s"这条信息' % (d[0].decode(encoding='utf-8'), d[1].decode(encoding='utf-8')), msg['FromUserName'])
 
 
 @itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
@@ -45,10 +48,20 @@ def text_reply(msg):
             if member['UserName'] == msg['ActualUserName']:
                 nick_name = member['NickName']
                 break
+
+        Content = msg['Content']
         now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-        daodemo.save_chat_log(msg['MsgId'], msg['Content'], msg['ActualNickName'], nick_name, msg['User']['NickName'],
+        daodemo.save_chat_log(msg['MsgId'], Content, nick_name, msg['ActualNickName'], msg['User']['NickName'],
                               now)
-        print(u'@%s\u2005 : %s' % (nick_name, msg['Content']))
+        print(u'@%s\u2005 : %s' % (nick_name, Content))
+
+        if Content.startswith('attack'):
+            conts = Content.split(" ")
+            attacked_name = conts[1]
+            sh = random.uniform(10, 2000)
+            sh = round(sh, 2)
+            print(nick_name, "对", attacked_name, "造成了", str(sh), "点伤害")
+            itchat.send('%s 对 %s 造成了 %s 点伤害' % (nick_name, attacked_name, str(sh)), from_user_name)
 
 
 # @itchat.msg_register(SYSTEM)
@@ -58,10 +71,18 @@ def text_reply(msg):
 itchat.auto_login(enableCmdQR=2)
 
 # 获取群id
-group_name = "含泪收菜"
-chatroom = itchat.search_chatrooms(name=group_name)
-if len(chatroom) > 0:
-    group_user_name = chatroom[0]['UserName']
-    itchat.run()
+# group_name = "距离血祭全群还有七天"
+chatrooms = itchat.get_chatrooms()
+x = 0
+for chatroom in chatrooms:
+    print(x, ":", chatroom['NickName'])
+    x += 1
+group_number = input("请选择：")
+
+if int(group_number) < 0 or int(group_number) > len(chatrooms)-1:
+    print("请输入正确的数字")
 else:
-    print("找不到'{}'这个群".format(group_name))
+    chosen_chatroom = chatrooms[int(group_number)]
+    print("选择了群:", chosen_chatroom['NickName'])
+    group_user_name = chosen_chatroom['UserName']
+    itchat.run()
