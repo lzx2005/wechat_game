@@ -58,7 +58,10 @@ def text_reply(msg):
 itchat.auto_login(enableCmdQR=2)
 
 # 获取群id
-chatroom = itchat.search_chatrooms(name='只要我绝对，尬聊没有极限')
-group_user_name = chatroom[0]['UserName']
-
-itchat.run()
+group_name = "含泪收菜"
+chatroom = itchat.search_chatrooms(name=group_name)
+if len(chatroom) > 0:
+    group_user_name = chatroom[0]['UserName']
+    itchat.run()
+else:
+    print("找不到'{}'这个群".format(group_name))
