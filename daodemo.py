@@ -31,7 +31,7 @@ def save_chat_log(msg_id, content, nickname, actual_nick_name, group_name, time)
     global conn
     try:
         cur = conn.cursor()
-        cur.execute('insert into chat_log(msg_id, content, nickname, actual_nick_name, group_name, received_time)VALUE ("%s", "%s","%s", "%s","%s","%s")' % (msg_id, content, nickname, actual_nick_name.encode(encoding='utf-8'), group_name, time))
+        cur.execute('insert into chat_log(msg_id, content, nickname, actual_nick_name, group_name, received_time)VALUE ("%s", "%s","%s", "%s","%s","%s")' % (msg_id, content, nickname, actual_nick_name, group_name, time))
         conn.commit()
         cur.close()
     except Exception as e:

@@ -58,10 +58,19 @@ def text_reply(msg):
         if Content.startswith('attack'):
             conts = Content.split(" ")
             attacked_name = conts[1]
-            sh = random.uniform(10, 2000)
+            sh = random.uniform(10, 20)  # 10-20的伤害
             sh = round(sh, 2)
-            print(nick_name, "对", attacked_name, "造成了", str(sh), "点伤害")
-            itchat.send('%s 对 %s 造成了 %s 点伤害' % (nick_name, attacked_name, str(sh)), from_user_name)
+
+            # 计算暴击 0.2的暴击几率
+            if random.random() < 0.2:
+                times = sh*random.uniform(2, 10)  # 2到10倍的伤害
+                times = round(times, 0)
+                sh = sh * times
+                print("[", times, "倍伤害]", nick_name, "对", attacked_name, "造成了", str(sh), "点暴击伤害！")
+                itchat.send('[%s倍伤害]%s 对 %s 造成了 %s 点暴击伤害！' % (str(times), nick_name, attacked_name, str(sh)), from_user_name)
+            else:
+                print(nick_name, "对", attacked_name, "造成了", str(sh), "点伤害！")
+                itchat.send('%s 对 %s 造成了 %s 点伤害!' % (nick_name, attacked_name, str(sh)), from_user_name)
 
 
 # @itchat.msg_register(SYSTEM)
