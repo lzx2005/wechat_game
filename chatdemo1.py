@@ -85,4 +85,6 @@ else:
     chosen_chatroom = chatrooms[int(group_number)]
     print("选择了群:", chosen_chatroom['NickName'])
     group_user_name = chosen_chatroom['UserName']
+    updated_chatroom = itchat.update_chatroom(userName=group_user_name, detailedMember=True)
+    print(json.dumps(updated_chatroom))
     itchat.run()
