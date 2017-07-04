@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import _thread
 import itchat
 import re, sys, json, time, random
 from itchat.content import *
@@ -10,6 +10,14 @@ from bs4 import BeautifulSoup
 # 要监听的群的UserName
 global group_user_name
 group_user_name = ""
+
+
+# 定义键盘输入线程
+def print_time( threadName, delay):
+   while True:
+        say = input()
+        # print(say)
+        itchat.send(say, group_user_name)
 
 
 @itchat.msg_register([NOTE], isGroupChat=True)
@@ -24,8 +32,8 @@ def text_reply(msg):
         # print("撤回了{}这条信息".format(msgid))
         data = daodemo.find_log_by_msg_id(msgid)
         for d in data:
-            print(u"{}撤回了'{}'这条信息".format(d[0].decode(encoding='utf-8'), d[1].decode(encoding='utf-8')))
-            itchat.send('%s撤回了"%s"这条信息' % (d[0].decode(encoding='utf-8'), d[1].decode(encoding='utf-8')), msg['FromUserName'])
+            print(u"{}撤回了'{}'这条信息".format(d[0], d[1]))
+            itchat.send('%s撤回了"%s"这条信息' % (d[0], d[1]), group_user_name)
 
 
 @itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
@@ -96,4 +104,8 @@ else:
     group_user_name = chosen_chatroom['UserName']
     updated_chatroom = itchat.update_chatroom(userName=group_user_name, detailedMember=True)
     print(json.dumps(updated_chatroom))
+    try:
+        _thread.start_new_thread(print_time, ("Thread-1", 2,))
+    except:
+        print("Error: 无法启动线程")
     itchat.run()
