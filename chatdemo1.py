@@ -88,7 +88,6 @@ def text_reply(msg):
 itchat.auto_login(enableCmdQR=2)
 
 # 获取群id
-# group_name = "距离血祭全群还有七天"
 chatrooms = itchat.get_chatrooms()
 x = 0
 for chatroom in chatrooms:
