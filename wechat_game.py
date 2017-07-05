@@ -23,11 +23,11 @@ def print_time( threadName, delay):
 def text_reply(msg):
     global group_user_name
     from_user_name = msg['User']['UserName']
-    # print(u'%s,%s' % (msg['User']['UserName'], group_user_name))
     if from_user_name == group_user_name:
         print(json.dumps(msg))
         # 找到真实的用户
         nick_name = ''
+        user_name = msg['ActualUserName']
         member_list = msg['User']['MemberList']
         for member in member_list:
             if member['UserName'] == msg['ActualUserName']:

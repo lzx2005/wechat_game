@@ -16,6 +16,40 @@ conn = pymysql.connect(host='localhost', user='root', passwd='123456', db='wecha
 print("与MySQL建立了链接")
 
 
+# 根据userName找到某一个用户
+def find_user_by_user_name(user_name):
+    global conn
+    try:
+        cur = conn.cursor()
+        cur.execute(f'SELECT * from user where userName = "{user_name}" limit 0,1')
+        data = cur.fetchall()
+        cur.close()
+        return data
+    except Exception as e:
+        print(e)
+
+
+# 根据name找到某一个用户，这个name有可能是displayName或者是nickName
+def find_user_by_name(name):
+    global conn
+    try:
+        cur = conn.cursor()
+        cur.execute(f'SELECT * from user where displayName = "{name}" limit 0,1')
+        data = cur.fetchall()
+        cur.close()
+        if len(data) < 1:
+            # 没找到用户，那就去找nickName
+            cur = conn.cursor()
+            cur.execute(f'SELECT * from user where nickName = "{name}" limit 0,1')
+            data = cur.fetchall()
+            cur.close()
+            return data
+        else:
+            return data
+    except Exception as e:
+        print(e)
+
+
 def insert_user(menber, group_user_name, group_nick_name):
     global conn
     try:
