@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 import random
 import mysql_dao
+import time
 from AttackError import AttackError
 
 
-def attack(user_name,content):
+def attack(user_name, content):
 
     # 1、从数据库获取攻击者的信息
     # 2、获取攻击者的血量，如果为0则是死亡状态，拒绝攻击
@@ -16,30 +17,122 @@ def attack(user_name,content):
     result = {}
 
     try:
+        # 找到攻击者在数据库中的信息
         attackers = mysql_dao.find_user_by_user_name(user_name=user_name)
         if len(attackers) < 1:
-            raise AttackError('找不到用户')
+            raise AttackError('找不到攻击者信息！请联系管理员')
         attacker = attackers[0]
+        # 判断当前用户是否已经死亡
+        hp = attacker[5]
+        dead_buff = attacker[20]
         if content.startswith('attack'):
+            if hp <= 0:
+                raise AttackError('你已经死亡，安安静静地不好吗？')
+            # 获取当前小时
+            t = time.localtime(time.time())
+            hour = t.tm_hour  # 当前小时
+            last_attack = attacker[14]  # 上一次攻击的时间
+            attack_num = attacker[15]
+            if last_attack == hour and attack_num >= 3:
+                ss = '你当前小时已经攻击了3次了，需要休息一下。' + str(hour+1) + '点再来攻击吧'
+                raise AttackError(ss)
             # 1、检查攻击语句是否正确
             contents = content.split(" ")
-            #contents需要长度为2或者长度为3
+            # contents需要长度为2或者长度为3
             if len(contents) >= 2:
                 # 普通攻击
                 # 1、获取被攻击者
-                attacked = contents[1]
-                # 2、去数据库找到被攻击者
-                print("普通攻击")
+                contents1 = contents[1]
+                # 2、去掉@标识
+                contents1_no_at = contents1[1: len(contents1)]
+                # 3、去数据库找到被攻击者
+                attackeds = mysql_dao.find_user_by_name(contents1_no_at.strip())
+                if len(attackeds) < 1:
+                    raise AttackError('你确定你要攻击的人是存在的？')
+                attacked = attackeds[0]
+                attacked_hp = attacked[5]
+                if attacked_hp <= 0:
+                    raise AttackError('你要攻击的人已经挂了')
+
+                # 4、开始计算攻击伤害
+                damage_result = count_damage(attacker=attacker, attacked=attacked)
+                if damage_result['code'] == 0:
+                    # 计算攻击成功，修改数据库
+                    rest_hp = attacked_hp - damage_result['damage']  # 当前血量减去扣的血
+                    if rest_hp < 0:
+                        rest_hp = 0
+                    mysql_dao.give_damage(
+                        attacker_id=attacker[0],
+                        attacked_id=attacked[0],
+                        damage=rest_hp,
+                        last_attack=last_attack,
+                        now_hour=hour
+                    )
+                    # 封装攻击成功的消息
+                    result.update({
+                        "code": 0,
+                        "msg": "攻击成功",
+                        "damage_type": 1,
+                        "damage": damage_result['damage'],
+                        "damage_to": damage_result['damage_to'],
+                        "damage_times": damage_result['damage_times'],
+                        "rest_hp": rest_hp,
+                        "isDead": False
+                    })
+                    if rest_hp == 0:
+                        result.update({
+                            "isDead": True
+                        })
+                    return result
+                else:
+                    raise AttackError(damage_result['msg'])
             else:
                 # 攻击语句出错
                 raise AttackError('攻击语句出错')
-            print()
         elif content.startswith('use'):
             # 使用道具
-            print()
+            if hp <= 0 and dead_buff <= 0:
+                raise AttackError('你已经死亡，且没有道具可以复活，安安静静地不好吗？')
+        else:
+            result.update({
+                "code": -1,
+                "msg": "不进行攻击"
+            })
+            return result
     except AttackError as ae:
+        print("进行攻击的时候出错", ae.value)
         error_result = {
             "code": 500,
             "msg": ae.value
         }
         return error_result
+
+
+def count_damage(attacker, attacked):
+    # 获取攻击力
+    min_damage = attacker[12]
+    max_damage = attacker[13]
+    base_damage = random.uniform(min_damage, max_damage)  # 基础伤害随机值
+    critical_pro = attacker[16]  # 暴击概率
+
+    damage_result = {
+        "damage_type": 1,
+        "damage": base_damage,
+        "damage_times": 1  # 暴击倍数1
+    }  # 普通攻击
+
+    if random.random() < float(critical_pro):
+        # 命中暴击概率，计算暴击
+        critical_times = attacker[17]  # 获取暴击倍数
+        critical_damage = base_damage * critical_times
+        damage_result.update({
+            "damage_type": 2,  # 设置返回信息里面是暴击
+            "damage": critical_damage,  # 更新暴击伤害值
+            "damage_times": critical_times  # 更新暴击倍数
+        })
+    damage_result.update({
+        "code": 0,
+        "msg": "攻击成功",
+        "damage_to": attacked[2]
+    })
+    return damage_result

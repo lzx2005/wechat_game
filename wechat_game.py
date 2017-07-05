@@ -5,6 +5,7 @@ import itchat
 import re, sys, json, time, random
 from itchat.content import *
 import mysql_dao
+import game_service
 
 # 要监听的群的UserName
 global group_user_name
@@ -24,7 +25,7 @@ def text_reply(msg):
     global group_user_name
     from_user_name = msg['User']['UserName']
     if from_user_name == group_user_name:
-        print(json.dumps(msg))
+        # print(json.dumps(msg))
         # 找到真实的用户
         nick_name = ''
         user_name = msg['ActualUserName']
@@ -36,27 +37,38 @@ def text_reply(msg):
 
         Content = msg['Content']
         print(u'@%s\u2005 : %s' % (nick_name, Content))
+        attack_result = game_service.attack(user_name=user_name, content=Content)  # 进行攻击
+        print(attack_result)
+        attack_result_info = ""
 
-        if Content.startswith('attack'):
-            conts = Content.split(" ")
-            attacked_name = conts[1]
-            sh = random.uniform(10, 20)  # 10-20的伤害
-            sh = round(sh, 2)
-
-            # 计算暴击 0.2的暴击几率
-            if random.random() < 0.2:
-                times = sh*random.uniform(2, 10)  # 2到10倍的伤害
-                times = round(times, 0)
-                sh = sh * times
-                print("[", times, "倍伤害]", nick_name, "对", attacked_name, "造成了", str(sh), "点暴击伤害！")
-                itchat.send('[%s倍伤害]%s 对 %s 造成了 %s 点暴击伤害！' % (str(times), nick_name, attacked_name, str(sh)), from_user_name)
+        if attack_result["code"] != -1:
+            if attack_result["code"] == 0:
+                # 攻击成功
+                damage_type = attack_result["damage_type"]
+                damage_to = attack_result["damage_to"]
+                damage = attack_result["damage"]
+                damage_times = attack_result["damage_times"]
+                rest_hp = attack_result["rest_hp"]
+                if damage_type == 1:
+                    # 普通攻击
+                    attack_result_info = '[信息][普通伤害]' + nick_name + '对' + damage_to + '造成了' + str(int(damage)) + '点伤害'
+                elif damage_type == 2:
+                    #暴击
+                    attack_result_info = '[信息][' + str(int(damage_times)) + '倍暴击]' + nick_name, '对' + damage_to + '造成了' + str(int(damage)) + '点暴击伤害'
+                isDead = attack_result['isDead']
+                attack_result_info = attack_result_info + "\n" + damage_to + "剩余血量:" + str(int(rest_hp)) + "/500"
+                if isDead:
+                    # 击杀
+                    attack_result_info = attack_result_info + "\n" + nick_name + "杀死了" + damage_to + "！"
             else:
-                print(nick_name, "对", attacked_name, "造成了", str(sh), "点伤害！")
-                itchat.send('%s 对 %s 造成了 %s 点伤害!' % (nick_name, attacked_name, str(sh)), from_user_name)
+                # 攻击失败
+                attack_result_info = '[信息][攻击失败]' + attack_result['msg']
+            # 发送消息
+            print(attack_result_info)
+            itchat.send(attack_result_info, from_user_name)
 
 
 itchat.auto_login(enableCmdQR=2)
-
 # 获取群id
 chatrooms = itchat.get_chatrooms()
 x = 0
