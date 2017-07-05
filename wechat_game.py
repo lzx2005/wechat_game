@@ -4,8 +4,7 @@ import _thread
 import itchat
 import re, sys, json, time, random
 from itchat.content import *
-import daodemo
-from bs4 import BeautifulSoup
+import mysql_dao
 
 # 要监听的群的UserName
 global group_user_name
@@ -20,35 +19,13 @@ def print_time( threadName, delay):
         itchat.send(say, group_user_name)
 
 
-@itchat.msg_register([NOTE], isGroupChat=True)
-def text_reply(msg):
-    global group_user_name
-    # print(msg)
-    if msg['MsgType'] == 10002 and msg['FromUserName'] == group_user_name:
-        # 这个表示撤回一条信息，我们拦截这个，再去数据库里找被拦截的那条语句
-        Content = msg['Content']
-        soup = BeautifulSoup(Content, 'html.parser')
-        msgid = soup.find('msgid').get_text()
-        # print("撤回了{}这条信息".format(msgid))
-        data = daodemo.find_log_by_msg_id(msgid)
-        for d in data:
-            print(u"{}撤回了'{}'这条信息".format(d[0], d[1]))
-            itchat.send('%s撤回了"%s"这条信息' % (d[0], d[1]), group_user_name)
-
-
-@itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
-def text_reply(msg):
-    # print(msg)
-    itchat.send('你好，我收到了您的消息"%s"，但是我现在不在手机身边，稍后我会联系您~' % (msg['Text']), msg['FromUserName'])
-
-
 @itchat.msg_register(TEXT, isGroupChat=True)
 def text_reply(msg):
-    # print(json.dumps(msg))
     global group_user_name
     from_user_name = msg['User']['UserName']
     # print(u'%s,%s' % (msg['User']['UserName'], group_user_name))
     if from_user_name == group_user_name:
+        print(json.dumps(msg))
         # 找到真实的用户
         nick_name = ''
         member_list = msg['User']['MemberList']
@@ -58,9 +35,6 @@ def text_reply(msg):
                 break
 
         Content = msg['Content']
-        now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-        daodemo.save_chat_log(msg['MsgId'], Content, nick_name, msg['ActualNickName'], msg['User']['NickName'],
-                              now)
         print(u'@%s\u2005 : %s' % (nick_name, Content))
 
         if Content.startswith('attack'):
@@ -81,10 +55,6 @@ def text_reply(msg):
                 itchat.send('%s 对 %s 造成了 %s 点伤害!' % (nick_name, attacked_name, str(sh)), from_user_name)
 
 
-# @itchat.msg_register(SYSTEM)
-# def get_uin(msg):
-
-
 itchat.auto_login(enableCmdQR=2)
 
 # 获取群id
@@ -103,6 +73,9 @@ else:
     group_user_name = chosen_chatroom['UserName']
     updated_chatroom = itchat.update_chatroom(userName=group_user_name, detailedMember=True)
     print(json.dumps(updated_chatroom))
+    MemberList = updated_chatroom['MemberList']
+    for menber in MemberList:
+        mysql_dao.insert_user(menber=menber, group_user_name=group_user_name, group_nick_name=chosen_chatroom['NickName'])
     try:
         _thread.start_new_thread(print_time, ("Thread-1", 2,))
     except:
