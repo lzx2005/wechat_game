@@ -9,6 +9,7 @@ from error.AttackError import AttackError
 
 print(level_exp.level_exp)
 
+
 def info(group_user_name):
     users = mysql_dao.find_all_user_by_group_user_name(group_user_name=group_user_name)
     try:
