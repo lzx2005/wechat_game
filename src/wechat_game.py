@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import _thread
+import json
+
 import itchat
-import re, sys, json, time, random
-from itchat.content import *
 import mysql_dao
-import game_service
+from itchat.content import *
+
+from src.service import game_service
 
 # 要监听的群的UserName
 global group_user_name

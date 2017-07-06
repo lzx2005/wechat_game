@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import random
-import mysql_dao
 import time
-from AttackError import AttackError
+
+from src.dao import mysql_dao
+from src.error.AttackError import AttackError
 
 
 def info(group_user_name):
