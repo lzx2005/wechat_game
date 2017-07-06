@@ -3,9 +3,11 @@
 import random
 import time
 
-from src.dao import mysql_dao
-from src.error.AttackError import AttackError
+from dao import mysql_dao
+from dict import level_exp
+from error.AttackError import AttackError
 
+print(level_exp.level_exp)
 
 def info(group_user_name):
     users = mysql_dao.find_all_user_by_group_user_name(group_user_name=group_user_name)
@@ -27,6 +29,7 @@ def info(group_user_name):
             "msg": ae.value
         }
         return error_result
+
 #
 # result = info(group_user_name="@@661daab861c14fa56704ef379e02485d667af12d801a20c9c3065d040eca3a31")
 # infos = "所有群员的血量信息如下："
@@ -85,8 +88,11 @@ def attack(user_name, content, group_user_name):
                 # 4、开始计算攻击伤害
                 damage_result = count_damage(attacker=attacker, attacked=attacked)
                 if damage_result['code'] == 0:
+                    damage = damage_result['damage']
+                    # 计算获得的经验值
+                    exp_add = count_exp(attacker=attacker, attacked=attacked, damage=damage)
                     # 计算攻击成功，修改数据库
-                    rest_hp = attacked_hp - damage_result['damage']  # 当前血量减去扣的血
+                    rest_hp = attacked_hp - damage  # 当前血量减去扣的血
                     if rest_hp < 0:
                         rest_hp = 0
                     mysql_dao.give_damage(
@@ -106,6 +112,7 @@ def attack(user_name, content, group_user_name):
                         "damage_to": damage_result['damage_to'],
                         "damage_times": damage_result['damage_times'],
                         "rest_hp": rest_hp,
+                        "exp_add": exp_add,
                         "isDead": False
                     })
                     if rest_hp == 0:
@@ -165,3 +172,20 @@ def count_damage(attacker, attacked):
         "damage_to": attacked[2]
     })
     return damage_result
+
+
+# 计算获得的经验
+def count_exp(attacker, attacked, damage):
+    attacked_level = attacked[8]  # 被攻击的等级
+    attacked_hp = attacked[5]
+    exp_add = round(attacked_level * random.uniform(1, 3))
+    rest_hp = attacked_hp - damage  # 当前血量减去扣的血
+    if rest_hp <= 0:
+        # 造成击杀
+        attacker_level = attacker[8]
+        # 计算攻击者和被攻击者的等级差别
+        level_min = attacked_level - attacker_level
+        # 计算次方 击杀的等级越高得到的经验也越高
+        exp_add = exp_add * (1.5**level_min)
+        # todo 该经验算法待改进
+    return exp_add

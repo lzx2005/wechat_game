@@ -4,10 +4,9 @@ import _thread
 import json
 
 import itchat
-from src.dao import mysql_dao
 from itchat.content import *
-
-from src.service import game_service
+from service import game_service
+from dao import mysql_dao
 
 # 要监听的群的UserName
 global group_user_name

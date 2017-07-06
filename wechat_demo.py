@@ -9,7 +9,7 @@ import itchat
 from bs4 import BeautifulSoup
 from itchat.content import *
 
-from src.dao import mysql_dao
+from dao import mysql_dao
 
 # 要监听的群的UserName
 global group_user_name
