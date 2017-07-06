@@ -4,7 +4,7 @@ import _thread
 import json
 
 import itchat
-import mysql_dao
+from src.dao import mysql_dao
 from itchat.content import *
 
 from src.service import game_service
