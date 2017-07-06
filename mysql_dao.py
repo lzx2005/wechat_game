@@ -124,7 +124,7 @@ def give_damage(attacker_id, attacked_id, damage, last_attack, now_hour, group_u
     global conn
     try:
         cur = conn.cursor()
-        if last_attack >= now_hour:
+        if last_attack == now_hour:
             # 还在当前时间内
             cur.execute('update user set attack_num = attack_num+1 where id = "%s" and groupUserName = "%s"' % (attacker_id, group_user_name))
         else:
