@@ -30,16 +30,26 @@ def find_user_by_user_name(user_name):
 
 
 # 根据name找到某一个用户，这个name有可能是displayName或者是nickName
-def find_user_by_name(name):
+def find_user_by_name(name, group_user_name):
     global conn
     print(name)
     try:
         cur = conn.cursor()
-        cur.execute(f'SELECT * from user where displayName = "{name}" or nickName = "{name}" limit 0,1')
+        cur.execute(f'SELECT * from user where displayName = "{name}" and groupUserName = "{group_user_name}" limit 0,1')
         data = cur.fetchall()
         cur.close()
-        print(data)
-        return data
+        if len(data) < 1:
+            cur = conn.cursor()
+            cur.execute(
+                f'SELECT * from user where nickName = "{name}" and groupUserName = "{group_user_name}" limit 0,1'
+            )
+            data = cur.fetchall()
+            cur.close()
+            print(data)
+            return data
+        else:
+            print(data)
+            return data
     except Exception as e:
         print(e)
 
@@ -110,21 +120,38 @@ def find_log_by_msg_id(msg_id):
 
 
 # 对某人造成伤害
-def give_damage(attacker_id, attacked_id, damage, last_attack, now_hour):
+def give_damage(attacker_id, attacked_id, damage, last_attack, now_hour, group_user_name):
     global conn
     try:
         cur = conn.cursor()
         if last_attack >= now_hour:
             # 还在当前时间内
-            cur.execute('update user set attack_num = attack_num+1 where id = "%s"' % attacker_id)
+            cur.execute('update user set attack_num = attack_num+1 where id = "%s" and groupUserName = "%s"' % (attacker_id, group_user_name))
         else:
             # 更新新的时间
-            cur.execute('update user set lastAttack = "%s",attack_num = 1 where id = "%s"' % (now_hour, attacker_id))
-        cur.execute('update user set hp = "%s" where id = "%s"' % (damage, attacked_id))
+            cur.execute(
+                'update user set lastAttack = "%s",attack_num = 1 where id = "%s" and groupUserName = "%s"' % (now_hour, attacker_id, group_user_name)
+            )
+        cur.execute(
+            'update user set hp = "%s" where id = "%s" and groupUserName = "%s"' % (damage, attacked_id, group_user_name)
+        )
         conn.commit()
         cur.close()
     except Exception as e:
         print(e)
 
 
-give_damage(72, 73, 10, 17, 18)
+def find_all_user_by_group_user_name(group_user_name):
+    global conn
+    try:
+        cur = conn.cursor()
+        sql = f'SELECT * from user where groupUserName = "{group_user_name}"'
+        print(sql)
+        cur.execute(sql)
+        data = cur.fetchall()
+        cur.close()
+        return data
+    except Exception as e:
+        print(e)
+
+# give_damage(72, 73, 10, 17, 18)

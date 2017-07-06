@@ -35,37 +35,44 @@ def text_reply(msg):
                 nick_name = member['NickName']
                 break
 
-        Content = msg['Content']
-        print(u'@%s\u2005 : %s' % (nick_name, Content))
-        attack_result = game_service.attack(user_name=user_name, content=Content)  # 进行攻击
-        print(attack_result)
-        attack_result_info = ""
-
-        if attack_result["code"] != -1:
-            if attack_result["code"] == 0:
-                # 攻击成功
-                damage_type = attack_result["damage_type"]
-                damage_to = attack_result["damage_to"]
-                damage = attack_result["damage"]
-                damage_times = attack_result["damage_times"]
-                rest_hp = attack_result["rest_hp"]
-                if damage_type == 1:
-                    # 普通攻击
-                    attack_result_info = '[信息][普通伤害]' + nick_name + '对' + damage_to + '造成了' + str(int(damage)) + '点伤害'
-                elif damage_type == 2:
-                    #暴击
-                    attack_result_info = '[信息][' + str(int(damage_times)) + '倍暴击]' + nick_name, '对' + damage_to + '造成了' + str(int(damage)) + '点暴击伤害'
-                isDead = attack_result['isDead']
-                attack_result_info = attack_result_info + "\n" + damage_to + "剩余血量:" + str(int(rest_hp)) + "/500"
-                if isDead:
-                    # 击杀
-                    attack_result_info = attack_result_info + "\n" + nick_name + "杀死了" + damage_to + "！"
-            else:
-                # 攻击失败
-                attack_result_info = '[信息][攻击失败]' + attack_result['msg']
-            # 发送消息
-            print(attack_result_info)
-            itchat.send(attack_result_info, from_user_name)
+        content = msg['Content']
+        print(u'@%s\u2005 : %s' % (nick_name, content))
+        if content.startswith('attack') or content.startswith('use'):
+            attack_result = game_service.attack(user_name=user_name, content=content, group_user_name=group_user_name)  # 进行攻击
+            print(attack_result)
+            if attack_result["code"] != -1:
+                attack_result_info = ""
+                if attack_result["code"] == 0:
+                    # 攻击成功
+                    damage_type = attack_result["damage_type"]
+                    damage_to = attack_result["damage_to"]
+                    damage = attack_result["damage"]
+                    damage_times = attack_result["damage_times"]
+                    rest_hp = attack_result["rest_hp"]
+                    if damage_type == 1:
+                        # 普通攻击
+                        attack_result_info = '[信息][普通伤害]' + nick_name + '对' + damage_to + '造成了' + str(int(damage)) + '点伤害'
+                    elif damage_type == 2:
+                        #暴击
+                        attack_result_info = '[信息][' + str(damage_times) + '倍暴击]' + nick_name + '对' + damage_to + '造成了' + str(damage) + '点暴击伤害'
+                    attack_result_info = attack_result_info + "\n" + damage_to + "剩余血量:" + str(rest_hp) + "/500"
+                    isDead = attack_result['isDead']
+                    if isDead:
+                        # 击杀
+                        attack_result_info = attack_result_info + "\n" + nick_name + "杀死了" + damage_to + "！"
+                else:
+                    # 攻击失败
+                    attack_result_info = '[信息][攻击失败]' + attack_result['msg']
+                # 发送消息
+                print(attack_result_info)
+                itchat.send(attack_result_info, from_user_name)
+        elif content == "info":
+            result = game_service.info(group_user_name=group_user_name)
+            info = "所有群员的血量信息如下："
+            for k, v in result.items():
+                info = info + "\n" + k + " : " + v
+            print(info)
+            itchat.send(info, from_user_name)
 
 
 itchat.auto_login(enableCmdQR=2)
