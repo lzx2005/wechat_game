@@ -24,8 +24,8 @@ friends = itchat.get_friends(update=True)
 man = 0
 woman = 0
 citys = {}
-
 for friend in friends:
+
     if friend['Sex'] == 1:
         #男人
         man += 1
@@ -33,12 +33,17 @@ for friend in friends:
         #女人
         woman += 1
     city = friend['City']
+    province = friend['Province']
     if len(city) > 0:
         city_sum = citys.get(city, 0)
         city_sum += 1
         citys[city] = city_sum
+    elif len(province) > 0:
+        city_sum = citys.get(province, 0)
+        city_sum += 1
+        citys[province] = city_sum
 
-print("您朋友中的男生共有", man, "人，女生共有", woman, "人\n男女比例为", man/woman)
+print("您微信好友中，男生共有", man, "人，女生共有", woman, "人\n男女比例为", man/woman)
 dict = sorted(dict2list(citys), key=lambda x:x[1], reverse=True)
 for item in dict:
     print("来自", item[0], "的共有：", item[1], "人")

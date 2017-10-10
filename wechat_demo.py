@@ -33,7 +33,7 @@ def text_reply(msg):
         Content = msg['Content']
         soup = BeautifulSoup(Content, 'html.parser')
         msgid = soup.find('msgid').get_text()
-        # print("撤回了{}这条信息".format(msgid))
+        # print("撤回了{}这条信息".format(msgid))ççç
         data = mysql_dao.find_log_by_msg_id(msgid)
         for d in data:
             print(u"{}撤回了'{}'这条信息".format(d[0], d[1]))
