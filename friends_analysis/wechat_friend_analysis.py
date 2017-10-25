@@ -15,6 +15,26 @@ def dict2list(dic:dict):
 itchat.auto_login(enableCmdQR=2)
 # 获取好友列表
 friends = itchat.get_friends(update=True)
+
+
+chatrooms = itchat.get_chatrooms()
+x = 0
+for chatroom in chatrooms:
+    print(x, ":", chatroom['NickName'])
+    x += 1
+group_number = input("请选择：")
+
+if int(group_number) < 0 or int(group_number) > len(chatrooms)-1:
+    print("请输入正确的数字")
+else:
+    chosen_chatroom = chatrooms[int(group_number)]
+    print("选择了群:", chosen_chatroom['NickName'])
+    group_user_name = chosen_chatroom['UserName']
+    updated_chatroom = itchat.update_chatroom(userName=group_user_name, detailedMember=True)
+    print(json.dumps(updated_chatroom))
+    MemberList = updated_chatroom['MemberList']
+friends = MemberList
+
 # 分析
 
 # f = open("friend.log", "w")
@@ -25,6 +45,8 @@ man = 0
 woman = 0
 citys = {}
 for friend in friends:
+    if man == 1:
+        print(json.dumps(friend))
 
     if friend['Sex'] == 1:
         #男人
