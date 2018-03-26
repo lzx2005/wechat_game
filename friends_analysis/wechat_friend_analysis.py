@@ -65,10 +65,16 @@ for friend in friends:
         city_sum += 1
         citys[province] = city_sum
 
-print("您微信好友中，男生共有", man, "人，女生共有", woman, "人\n男女比例为", man/woman)
-dict = sorted(dict2list(citys), key=lambda x:x[1], reverse=True)
+text = ""
+print("该群中，男生共有", man, "人，女生共有", woman, "人\n男女比例为", man/woman)
+text += " ".join(["该群中，男生共有", str(man), "人，女生共有", str(woman), "人\n男女比例为", str(man/woman), "\n"])
+dict = sorted(dict2list(citys), key=lambda x: x[1], reverse=True)
 for item in dict:
     print("来自", item[0], "的共有：", item[1], "人")
+    text += " ".join(["来自", str(item[0]), "的共有：", str(item[1]), "人", "\n"])
+
+itchat.send(text, 'filehelper')
+
 
 #
 #
