@@ -81,6 +81,14 @@ def text_reply(msg):
                 info = info + "\n" + k + " : " + v
             print(info)
             itchat.send(info, from_user_name)
+        elif content == "help":
+            info = "命令列表\n"
+            info = info + "攻击：attack AtXXX\n"
+            info = info + "群员信息：info\n"
+            info = info + "我的信息：myinfo\n"
+            info = info + "帮助：help"
+            print(info)
+            itchat.send(info, from_user_name)
 
 
 itchat.auto_login(enableCmdQR=2)
