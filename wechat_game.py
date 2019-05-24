@@ -63,7 +63,7 @@ def text_reply(msg):
                         attack_result_info = attack_result_info + "\n" + nick_name + "杀死了" + damage_to + "！"
                 else:
                     # 攻击失败
-                    attack_result_info = '[信息][攻击失败]' + attack_result['msg']
+                    attack_result_info = '[信息]['+nick_name+'攻击失败]' + attack_result['msg']
                 # 发送消息
                 print(attack_result_info)
                 itchat.send(attack_result_info, from_user_name)
