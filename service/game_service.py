@@ -64,8 +64,9 @@ def info(group_user_name):
         for user in users:
             nick_name = user[2]
             hp = user[5]
+            max_hp = user[6]
             result_info.update({
-                nick_name: str(hp) + "/500"
+                nick_name: str(hp) + "/" + str(max_hp)
             })
         return result_info
     except AttackError as ae:

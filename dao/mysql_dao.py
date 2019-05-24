@@ -6,6 +6,7 @@
 __author__ = 'Li Zhengxian'
 
 import pymysql
+from dict import init_info
 
 global conn
 
@@ -58,7 +59,7 @@ def insert_user(menber, group_user_name, group_nick_name):
     global conn
     try:
         cur = conn.cursor()
-        sql = 'insert into user(userName,nickName,remarkName,displayName,hp,power,level,exp,groupUserName,groupNickName,minDamage,maxDamage,lastAttack)VALUE ("%s", "%s","%s","%s", "%s","%s","%s","%s","%s","%s","%s","%s","%s")'
+        sql = 'insert into user(userName,nickName,remarkName,displayName,hp,maxHp,power,level,exp,groupUserName,groupNickName,minDamage,maxDamage,lastAttack)VALUE ("%s", "%s","%s","%s","%s", "%s","%s","%s","%s","%s","%s","%s","%s","%s")'
         sql = sql + 'ON DUPLICATE KEY UPDATE\n'
         sql = sql + 'userName =  "%s",\n'
         sql = sql + 'groupUserName =  "%s",\n'
@@ -68,20 +69,21 @@ def insert_user(menber, group_user_name, group_nick_name):
             menber['NickName'],
             menber['RemarkName'],
             menber['DisplayName'],
-            500,
+            init_info.init_info["hp"],
+            init_info.init_info["max_hp"],
             24,
-            1,
-            0,
+            init_info.init_info["level"],
+            init_info.init_info["exp"],
             group_user_name,
             group_nick_name,
-            1,
-            10,
+            init_info.init_info["min_damage"],
+            init_info.init_info["max_damage"],
             0,
             menber['UserName'],
             group_user_name,
             group_nick_name,
         )
-        # print(sql)
+        print(sql)
         cur.execute(sql)
         conn.commit()
         cur.close()
