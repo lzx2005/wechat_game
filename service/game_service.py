@@ -10,6 +10,51 @@ from error.AttackError import AttackError
 print(level_exp.level_exp)
 
 
+def my_info(user_name):
+    # 找到攻击者在数据库中的信息
+    attackers = mysql_dao.find_user_by_user_name(user_name=user_name)
+    if len(attackers) < 1:
+        raise AttackError('找不到当前用户信息！请联系管理员')
+    attacker = attackers[0]
+    try:
+        hp = attacker[5]
+        max_hp = attacker[6]
+        power = attacker[7]
+        level = attacker[8]
+        exp = attacker[9]
+        min_damage = attacker[12]
+        max_damage = attacker[13]
+        critical_pro = attacker[16]
+        critical_times = attacker[17]
+        acctack_buff = attacker[18]
+        dead_buff = attacker[19]
+        usr_buff = attacker[20]
+        pass_buff = attacker[21]
+        result_info = {
+            "当前血量": str(hp),
+            "最大血量": str(max_hp),
+            "力量值": str(power),
+            "当前等级": str(level),
+            "当前经验值": str(exp),
+            "最小伤害": str(min_damage),
+            "最大伤害": str(max_damage),
+            "暴击概率": str(critical_pro),
+            "暴击倍数": str(critical_times),
+            "攻击Buff": str(acctack_buff),
+            "死亡Buff": str(dead_buff),
+            "玩家Buff": str(usr_buff),
+            "被动Buff": str(pass_buff)
+        }
+        return result_info
+    except AttackError as ae:
+        print("查询信息出错", ae.value)
+        error_result = {
+            "code": 500,
+            "msg": ae.value
+        }
+        return error_result
+
+
 def info(group_user_name):
     users = mysql_dao.find_all_user_by_group_user_name(group_user_name=group_user_name)
     try:
@@ -37,6 +82,7 @@ def info(group_user_name):
 # for k, v in result.items():
 #     infos = infos + "\n" + k + " : " + v
 # print(infos)
+
 
 def attack(user_name, content, group_user_name):
 

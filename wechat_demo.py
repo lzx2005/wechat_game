@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 import _thread
 import json
 import random
@@ -88,7 +89,7 @@ def text_reply(msg):
 # def get_uin(msg):
 
 
-itchat.auto_login(enableCmdQR=2)
+itchat.auto_login(enableCmdQR=0)
 
 # 获取群id
 chatrooms = itchat.get_chatrooms()

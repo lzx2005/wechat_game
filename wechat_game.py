@@ -74,6 +74,13 @@ def text_reply(msg):
                 info = info + "\n" + k + " : " + v
             print(info)
             itchat.send(info, from_user_name)
+        elif content == "myinfo":
+            result = game_service.my_info(user_name=user_name)
+            info = "用户["+nick_name+"]的信息如下："
+            for k, v in result.items():
+                info = info + "\n" + k + " : " + v
+            print(info)
+            itchat.send(info, from_user_name)
 
 
 itchat.auto_login(enableCmdQR=2)
@@ -96,8 +103,8 @@ else:
     MemberList = updated_chatroom['MemberList']
     for menber in MemberList:
         mysql_dao.insert_user(menber=menber, group_user_name=group_user_name, group_nick_name=chosen_chatroom['NickName'])
-    try:
-        _thread.start_new_thread(print_time, ("Thread-1", 2,))
-    except:
-        print("Error: 无法启动线程")
+    # try:
+    #     _thread.start_new_thread(print_time, ("Thread-1", 2,))
+    # except:
+    #     print("Error: 无法启动线程")
     itchat.run()

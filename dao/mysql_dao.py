@@ -12,7 +12,7 @@ global conn
 import codecs
 codecs.register(lambda name: codecs.lookup('utf8') if name == 'utf8mb4' else None)
 
-conn = pymysql.connect(host='localhost', user='root', passwd='123456', db='wechat_game', port=3306, charset='utf8mb4')
+conn = pymysql.connect(host='localhost', user='root', passwd='lzx2005rrr', db='wechat_game', port=3306, charset='utf8mb4')
 print("与MySQL建立了链接")
 
 
